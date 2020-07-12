@@ -46,7 +46,7 @@ while True:
             userInput = s.recv(5000) #receive the instruccion
             userInput = userInput.decode()
             file = open(userInput, 'rb') #open the file especified as readable file
-            fileName = str(os.path.basename(file.name)) #get name of the file with extension
+            fileName = str(os.path.basename(file.name)) #get name of the file with extension            
             s.send(fileName.encode()) #send file name
             data = file.read() #copy info to data var
             s.send(data) #send info
@@ -66,6 +66,14 @@ while True:
             error = Fore.LIGHTWHITE_EX+'\n['+Fore.LIGHTRED_EX+'*'+Fore.LIGHTWHITE_EX+']'+'Error: ' + str(e)         
             s.send(error.encode()) #send error message
             print(error)
+
+    elif command == 'send_file':
+        fileName = s.recv(6000)
+        fileName = fileName.decode()
+        newFile = open(fileName, 'wb') #create a file with same name and extention of the original file
+        data = s.recv(6000)
+        newFile.write(data) #copy data into the file
+        newFile.close() #save the file
 
     elif command == 'exit':
         quit()

